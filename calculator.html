@@ -40,10 +40,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .field .unit{font-size:11px;color:var(--text3);font-family:var(--mono);width:42px;flex-shrink:0}
 .name-input{width:100%!important;text-align:left!important;font-family:var(--sans)!important}
 .sub-title{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin:14px 0 10px;padding-top:12px;border-top:1px solid var(--border)}
-.presets-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.presets-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)}
-.btn-settings{background:none;border:1px solid var(--border);border-radius:5px;color:var(--text3);font-size:13px;padding:3px 7px;cursor:pointer;line-height:1;transition:all .12s;font-family:var(--sans)}
-.btn-settings:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
 .presets{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
 .preset-btn{background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text2);font-size:11px;font-family:var(--sans);font-weight:500;padding:4px 9px;cursor:pointer;transition:all .12s}
 .preset-btn:hover{border-color:var(--accent);color:var(--accent)}
@@ -92,45 +88,54 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .io-note{font-size:11px;color:var(--text3);margin-top:6px;line-height:1.5}
 #result-section{display:none}
 #file-input{display:none}
-
-/* ====== MODAL ====== */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .18s}
-.modal-overlay.open{opacity:1;pointer-events:all}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;width:100%;max-width:540px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.18)}
-.modal-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.modal-head h2{font-size:15px;font-weight:700}
-.modal-close{background:none;border:none;font-size:20px;color:var(--text3);cursor:pointer;padding:0 4px;line-height:1;border-radius:4px;transition:color .12s}
-.modal-close:hover{color:var(--text)}
-.modal-body{flex:1;overflow-y:auto;padding:12px 16px}
-.modal-foot{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0}
-.modal-foot .btn-add{flex:1;background:var(--surface2);border:1px dashed var(--border2);border-radius:6px;font-family:var(--sans);font-size:12px;font-weight:500;color:var(--text2);padding:8px;cursor:pointer;transition:all .12s}
-.modal-foot .btn-add:hover{border-color:var(--green);color:var(--green);background:var(--green-bg)}
-.modal-foot .btn-save{background:var(--accent);border:none;border-radius:6px;font-family:var(--sans);font-size:12px;font-weight:600;color:#fff;padding:8px 18px;cursor:pointer;transition:background .12s}
-.modal-foot .btn-save:hover{background:#1d4ed8}
-.modal-foot .btn-reset{background:none;border:1px solid var(--border2);border-radius:6px;font-family:var(--sans);font-size:12px;color:var(--text2);padding:8px 12px;cursor:pointer;transition:all .12s}
-.modal-foot .btn-reset:hover{border-color:var(--red);color:var(--red)}
-
-/* preset rows in modal */
-.preset-row{display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--border);user-select:none}
-.preset-row:last-child{border-bottom:none}
-.preset-row.drag-over{background:var(--accent-bg);border-radius:6px}
-.preset-row.dragging{opacity:.4}
-.drag-handle{color:var(--text3);cursor:grab;font-size:14px;padding:2px 4px;flex-shrink:0;line-height:1}
-.drag-handle:active{cursor:grabbing}
-.pr-name{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:5px;font-family:var(--sans);font-size:12px;font-weight:500;color:var(--text);padding:5px 8px;outline:none;transition:border-color .12s}
-.pr-name:focus{border-color:var(--accent);background:var(--accent-bg)}
-.pr-num{width:72px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;font-family:var(--mono);font-size:12px;color:var(--text);padding:5px 7px;outline:none;text-align:right;transition:border-color .12s;flex-shrink:0}
-.pr-num:focus{border-color:var(--accent);background:var(--accent-bg)}
-.pr-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:0 3px;line-height:1;flex-shrink:0;transition:color .12s}
-.pr-del:hover{color:var(--red)}
-.pr-col-labels{display:flex;gap:6px;padding:0 0 4px;margin-bottom:2px}
-.pr-col-labels span{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)}
-.pr-col-labels .l-name{flex:1}
-.pr-col-labels .l-extra{width:72px;text-align:right;flex-shrink:0}
-.pr-col-labels .l-deliv{width:72px;text-align:right;flex-shrink:0}
-.pr-col-labels .l-del{width:22px;flex-shrink:0}
-
 @media(max-width:600px){.layout{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}.field input{width:90px}.header{flex-direction:column;align-items:flex-start;gap:10px}}
+
+/* ===== MODAL ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1000;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:12px;border:1px solid var(--border);width:100%;max-width:640px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,0.18)}
+.modal-header{padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal-header h2{font-size:15px;font-weight:700;color:var(--text)}
+.modal-header p{font-size:11px;color:var(--text3);margin-top:2px}
+.modal-close{background:none;border:none;font-size:20px;color:var(--text3);cursor:pointer;padding:2px 6px;border-radius:4px;line-height:1;transition:color .12s}
+.modal-close:hover{color:var(--red)}
+.modal-body{overflow-y:auto;padding:18px 22px;flex:1}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0}
+.modal-footer-left{display:flex;gap:8px}
+.modal-footer-right{display:flex;gap:8px}
+
+/* Settings table */
+.settings-table{width:100%;border-collapse:collapse}
+.settings-table thead th{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 10px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+.settings-table thead th:nth-child(3),.settings-table thead th:nth-child(4){text-align:right;width:130px}
+.settings-table thead th:nth-child(2){min-width:120px}
+.settings-table thead th:last-child{text-align:center;width:32px}
+.settings-table tbody tr{border-bottom:1px solid var(--border)}
+.settings-table tbody tr:last-child{border-bottom:none}
+.settings-table tbody tr:hover{background:var(--surface2)}
+.settings-table tbody td{padding:5px 6px;vertical-align:middle}
+.st-name-input{width:100%;background:transparent;border:1px solid transparent;border-radius:5px;font-family:var(--sans);font-size:13px;font-weight:500;color:var(--text);padding:5px 7px;outline:none;transition:border-color .12s,background .12s}
+.st-name-input:hover{border-color:var(--border)}
+.st-name-input:focus{border-color:var(--accent);background:var(--accent-bg)}
+.st-num-input{width:110px;background:transparent;border:1px solid transparent;border-radius:5px;font-family:var(--mono);font-size:13px;font-weight:500;color:var(--text);padding:5px 6px;outline:none;text-align:right;transition:border-color .12s,background .12s;display:block;margin-left:auto}
+.st-num-input:hover{border-color:var(--border)}
+.st-num-input:focus{border-color:var(--accent);background:var(--accent-bg)}
+.st-del-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:17px;padding:2px 6px;line-height:1;border-radius:4px;transition:color .12s;display:block;margin:0 auto}
+.st-del-btn:hover{color:var(--red)}
+.st-total{font-family:var(--mono);font-size:12px;color:var(--text3);text-align:right;padding:6px 8px 0;border-top:1px dashed var(--border);display:block}
+
+.btn-add{background:var(--surface2);border:1px dashed var(--border2);border-radius:7px;color:var(--text2);font-family:var(--sans);font-size:12px;font-weight:500;padding:8px 14px;cursor:pointer;transition:all .12s;margin-top:12px}
+.btn-add:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+.btn-save{background:var(--accent);border:1px solid var(--accent);border-radius:6px;color:#fff;font-family:var(--sans);font-size:12px;font-weight:600;padding:8px 18px;cursor:pointer;transition:all .15s}
+.btn-save:hover{background:#1d4ed8}
+.btn-cancel{background:var(--surface);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-family:var(--sans);font-size:12px;font-weight:500;padding:8px 14px;cursor:pointer;transition:all .15s}
+.btn-cancel:hover{border-color:var(--text2);color:var(--text)}
+.btn-reset{background:none;border:1px solid var(--border2);border-radius:6px;color:var(--text3);font-family:var(--sans);font-size:12px;font-weight:500;padding:8px 14px;cursor:pointer;transition:all .15s}
+.btn-reset:hover{border-color:var(--red);color:var(--red)}
+.drag-handle{cursor:grab;color:var(--text3);font-size:14px;padding:0 4px;user-select:none}
+.drag-handle:hover{color:var(--text2)}
+tr.dragging{opacity:0.4}
+tr.drag-over{border-top:2px solid var(--accent)}
 </style>
 </head>
 <body>
@@ -141,6 +146,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
     <p>птица и мясо · автономный режим</p>
   </div>
   <div class="header-actions">
+    <button class="btn-sm" onclick="openSettings()">⚙ Категории</button>
     <button class="btn-sm" onclick="exportProducts()">↓ Экспорт базы</button>
     <button class="btn-sm" onclick="document.getElementById('file-input').click()">↑ Импорт базы</button>
     <input type="file" id="file-input" accept=".json" onchange="importProducts(event)">
@@ -171,10 +177,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 
 <div class="card">
   <div class="card-title">Ставки расходов / кг</div>
-  <div class="presets-header">
-    <span class="presets-label">Категории</span>
-    <button class="btn-settings" onclick="openModal()" title="Редактировать категории">⚙ Настройки</button>
-  </div>
   <div class="presets" id="presets"></div>
   <div class="hint-box" id="preset-hint"></div>
   <div class="field"><label>Склад / входящая логистика</label><div class="iw"><input type="number" id="extra_rate" value="0" step="0.001" oninput="calc()"><span class="unit">руб/кг</span></div></div>
@@ -245,26 +247,39 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 </div><!-- /layout -->
 </div><!-- /container -->
 
-<!-- MODAL: настройки категорий -->
-<div class="modal-overlay" id="modal-overlay" onclick="overlayClick(event)">
+<!-- ===== SETTINGS MODAL ===== -->
+<div class="modal-overlay" id="settings-modal" onclick="handleOverlayClick(event)">
   <div class="modal">
-    <div class="modal-head">
-      <h2>Настройки категорий</h2>
-      <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-header">
+      <div>
+        <h2>Настройка категорий</h2>
+        <p>Редактируйте название, ставки склада и доставки для каждой кнопки-пресета</p>
+      </div>
+      <button class="modal-close" onclick="closeSettings()">×</button>
     </div>
     <div class="modal-body">
-      <div class="pr-col-labels" style="padding-left:26px">
-        <span class="l-name">Название</span>
-        <span class="l-extra">Склад</span>
-        <span class="l-deliv">Доставка</span>
-        <span class="l-del"></span>
-      </div>
-      <div id="modal-rows"></div>
+      <table class="settings-table">
+        <thead>
+          <tr>
+            <th style="width:24px"></th>
+            <th>Название кнопки</th>
+            <th>Склад, руб/кг</th>
+            <th>Доставка, руб/кг</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="settings-tbody"></tbody>
+      </table>
+      <button class="btn-add" onclick="addSettingsRow()">+ Добавить категорию</button>
     </div>
-    <div class="modal-foot">
-      <button class="btn-add" onclick="modalAddRow()">+ Добавить категорию</button>
-      <button class="btn-reset" onclick="modalReset()">Сбросить</button>
-      <button class="btn-save" onclick="modalSave()">Сохранить</button>
+    <div class="modal-footer">
+      <div class="modal-footer-left">
+        <button class="btn-reset" onclick="resetToDefaults()">Сбросить по умолчанию</button>
+      </div>
+      <div class="modal-footer-right">
+        <button class="btn-cancel" onclick="closeSettings()">Отмена</button>
+        <button class="btn-save" onclick="saveSettings()">Сохранить</button>
+      </div>
     </div>
   </div>
 </div>
@@ -288,124 +303,153 @@ const DEFAULT_PRESETS=[
 
 function loadPresets(){
   try{
-    const raw=localStorage.getItem('calc_presets');
-    if(raw){const arr=JSON.parse(raw);if(Array.isArray(arr)&&arr.length)return arr}
+    const saved=localStorage.getItem('calc_presets');
+    if(saved){const p=JSON.parse(saved);if(Array.isArray(p)&&p.length>0)return p;}
   }catch(e){}
-  return DEFAULT_PRESETS.map(p=>({...p}));
+  return JSON.parse(JSON.stringify(DEFAULT_PRESETS));
 }
-function savePresets(arr){localStorage.setItem('calc_presets',JSON.stringify(arr))}
+function savePresets(arr){localStorage.setItem('calc_presets',JSON.stringify(arr));}
 
 let PRESETS=loadPresets();
 
-function renderPresetBtns(){
+// ===== RENDER PRESET BUTTONS =====
+function renderPresets(){
   const pc=document.getElementById('presets');
   pc.innerHTML='';
   PRESETS.forEach(p=>{
     const b=document.createElement('button');
-    b.className='preset-btn';b.textContent=p.name;
+    b.className='preset-btn';
+    b.textContent=p.name;
     b.onclick=()=>{
       document.querySelectorAll('.preset-btn').forEach(x=>x.classList.remove('active'));
       b.classList.add('active');
-      document.getElementById('extra_rate').value=p.extra.toFixed(3);
-      document.getElementById('delivery_rate').value=p.delivery.toFixed(3);
+      document.getElementById('extra_rate').value=(+p.extra).toFixed(3);
+      document.getElementById('delivery_rate').value=(+p.delivery).toFixed(3);
       const h=document.getElementById('preset-hint');
       h.style.display='block';
-      h.textContent=p.name+': склад '+p.extra.toFixed(3)+' + доставка '+p.delivery.toFixed(3)+' = '+(p.extra+p.delivery).toFixed(3)+' руб/кг';
+      h.textContent=p.name+': склад '+(+p.extra).toFixed(3)+' + доставка '+(+p.delivery).toFixed(3)+' = '+(+p.extra+ +p.delivery).toFixed(3)+' руб/кг';
       calc();
     };
     pc.appendChild(b);
   });
 }
 
-/* ========== MODAL ========== */
+// ===== SETTINGS MODAL =====
 let dragSrc=null;
 
-function openModal(){
-  renderModalRows(PRESETS.map(p=>({...p})));
-  document.getElementById('modal-overlay').classList.add('open');
-}
-function closeModal(){
-  document.getElementById('modal-overlay').classList.remove('open');
-}
-function overlayClick(e){if(e.target===document.getElementById('modal-overlay'))closeModal()}
-
-function renderModalRows(presets){
-  const container=document.getElementById('modal-rows');
-  container.innerHTML='';
-  presets.forEach((p,i)=>container.appendChild(buildRow(p,i,presets.length)));
+function openSettings(){
+  renderSettingsTable();
+  document.getElementById('settings-modal').classList.add('open');
 }
 
-function buildRow(p,_i,_total){
-  const row=document.createElement('div');
-  row.className='preset-row';
-  row.draggable=true;
-  row.innerHTML=`
-    <span class="drag-handle" title="Перетащить">⠿</span>
-    <input class="pr-name" type="text" value="${escHtml(p.name)}" placeholder="Название">
-    <input class="pr-num" type="number" value="${p.extra}" step="0.001" placeholder="0.000" title="Склад руб/кг">
-    <input class="pr-num" type="number" value="${p.delivery}" step="0.001" placeholder="0.000" title="Доставка руб/кг">
-    <button class="pr-del" title="Удалить">×</button>`;
-  row.querySelector('.pr-del').onclick=()=>row.remove();
+function closeSettings(){
+  document.getElementById('settings-modal').classList.remove('open');
+}
 
-  row.addEventListener('dragstart',e=>{
-    dragSrc=row;row.classList.add('dragging');
-    e.dataTransfer.effectAllowed='move';
+function handleOverlayClick(e){
+  if(e.target===document.getElementById('settings-modal'))closeSettings();
+}
+
+function renderSettingsTable(){
+  const tbody=document.getElementById('settings-tbody');
+  tbody.innerHTML='';
+  PRESETS.forEach((p,i)=>{
+    const tr=document.createElement('tr');
+    tr.dataset.idx=i;
+    tr.draggable=true;
+    tr.innerHTML=`
+      <td><span class="drag-handle" title="Перетащить для сортировки">⠿</span></td>
+      <td><input class="st-name-input" type="text" value="${escHtml(p.name)}" placeholder="Название..."></td>
+      <td><input class="st-num-input" type="number" value="${(+p.extra).toFixed(3)}" step="0.001" min="0"></td>
+      <td><input class="st-num-input" type="number" value="${(+p.delivery).toFixed(3)}" step="0.001" min="0"></td>
+      <td><button class="st-del-btn" onclick="deleteSettingsRow(this)" title="Удалить">×</button></td>
+    `;
+    // drag events
+    tr.addEventListener('dragstart',e=>{dragSrc=tr;tr.classList.add('dragging');e.dataTransfer.effectAllowed='move';});
+    tr.addEventListener('dragend',()=>{tr.classList.remove('dragging');document.querySelectorAll('.drag-over').forEach(x=>x.classList.remove('drag-over'));});
+    tr.addEventListener('dragover',e=>{e.preventDefault();tr.classList.add('drag-over');});
+    tr.addEventListener('dragleave',()=>tr.classList.remove('drag-over'));
+    tr.addEventListener('drop',e=>{
+      e.preventDefault();
+      tr.classList.remove('drag-over');
+      if(dragSrc&&dragSrc!==tr){
+        const rows=[...tbody.querySelectorAll('tr')];
+        const from=rows.indexOf(dragSrc);
+        const to=rows.indexOf(tr);
+        if(from<to)tbody.insertBefore(dragSrc,tr.nextSibling);
+        else tbody.insertBefore(dragSrc,tr);
+      }
+    });
+    tbody.appendChild(tr);
   });
-  row.addEventListener('dragend',()=>{
-    dragSrc=null;row.classList.remove('dragging');
-    document.querySelectorAll('.preset-row').forEach(r=>r.classList.remove('drag-over'));
-  });
-  row.addEventListener('dragover',e=>{
-    e.preventDefault();e.dataTransfer.dropEffect='move';
-    if(dragSrc&&dragSrc!==row)row.classList.add('drag-over');
-  });
-  row.addEventListener('dragleave',()=>row.classList.remove('drag-over'));
-  row.addEventListener('drop',e=>{
-    e.preventDefault();row.classList.remove('drag-over');
-    if(!dragSrc||dragSrc===row)return;
-    const container=document.getElementById('modal-rows');
-    const rows=[...container.children];
-    const srcIdx=rows.indexOf(dragSrc);
-    const dstIdx=rows.indexOf(row);
-    if(srcIdx<dstIdx)row.after(dragSrc);else row.before(dragSrc);
-  });
-  return row;
 }
 
-function modalAddRow(){
-  const container=document.getElementById('modal-rows');
-  const row=buildRow({name:'',extra:0,delivery:0},container.children.length,container.children.length+1);
-  container.appendChild(row);
-  row.querySelector('.pr-name').focus();
+function addSettingsRow(){
+  const tbody=document.getElementById('settings-tbody');
+  const i=tbody.querySelectorAll('tr').length;
+  const tr=document.createElement('tr');
+  tr.dataset.idx=i;
+  tr.draggable=true;
+  tr.innerHTML=`
+    <td><span class="drag-handle" title="Перетащить">⠿</span></td>
+    <td><input class="st-name-input" type="text" value="" placeholder="Название категории..."></td>
+    <td><input class="st-num-input" type="number" value="0.000" step="0.001" min="0"></td>
+    <td><input class="st-num-input" type="number" value="0.000" step="0.001" min="0"></td>
+    <td><button class="st-del-btn" onclick="deleteSettingsRow(this)" title="Удалить">×</button></td>
+  `;
+  tr.addEventListener('dragstart',e=>{dragSrc=tr;tr.classList.add('dragging');e.dataTransfer.effectAllowed='move';});
+  tr.addEventListener('dragend',()=>{tr.classList.remove('dragging');document.querySelectorAll('.drag-over').forEach(x=>x.classList.remove('drag-over'));});
+  tr.addEventListener('dragover',e=>{e.preventDefault();tr.classList.add('drag-over');});
+  tr.addEventListener('dragleave',()=>tr.classList.remove('drag-over'));
+  tr.addEventListener('drop',e=>{
+    e.preventDefault();tr.classList.remove('drag-over');
+    if(dragSrc&&dragSrc!==tr){
+      const rows=[...tbody.querySelectorAll('tr')];
+      const from=rows.indexOf(dragSrc),to=rows.indexOf(tr);
+      if(from<to)tbody.insertBefore(dragSrc,tr.nextSibling);else tbody.insertBefore(dragSrc,tr);
+    }
+  });
+  tbody.appendChild(tr);
+  tr.querySelector('.st-name-input').focus();
 }
 
-function modalSave(){
-  const rows=[...document.getElementById('modal-rows').children];
-  const result=rows.map(row=>{
-    const inputs=row.querySelectorAll('input');
-    return{
-      name:inputs[0].value.trim(),
-      extra:parseFloat(inputs[1].value)||0,
-      delivery:parseFloat(inputs[2].value)||0
-    };
-  }).filter(p=>p.name);
-  if(!result.length){alert('Добавьте хотя бы одну категорию');return}
-  PRESETS=result;
+function deleteSettingsRow(btn){
+  const tr=btn.closest('tr');
+  const name=tr.querySelector('.st-name-input').value||'эту категорию';
+  if(!confirm('Удалить «'+name+'»?'))return;
+  tr.remove();
+}
+
+function saveSettings(){
+  const rows=document.getElementById('settings-tbody').querySelectorAll('tr');
+  const newPresets=[];
+  rows.forEach(tr=>{
+    const name=tr.querySelectorAll('input')[0].value.trim();
+    const extra=parseFloat(tr.querySelectorAll('input')[1].value)||0;
+    const delivery=parseFloat(tr.querySelectorAll('input')[2].value)||0;
+    if(name)newPresets.push({name,extra,delivery});
+  });
+  if(newPresets.length===0){alert('Добавьте хотя бы одну категорию');return;}
+  PRESETS=newPresets;
   savePresets(PRESETS);
-  renderPresetBtns();
-  closeModal();
+  renderPresets();
+  closeSettings();
+  // hide hint since active preset may be gone
+  document.getElementById('preset-hint').style.display='none';
+  document.getElementById('extra_rate').value='0';
+  document.getElementById('delivery_rate').value='0';
 }
 
-function modalReset(){
-  if(!confirm('Сбросить все категории к значениям по умолчанию?'))return;
-  renderModalRows(DEFAULT_PRESETS.map(p=>({...p})));
+function resetToDefaults(){
+  if(!confirm('Сбросить все категории к заводским настройкам? Ваши изменения будут удалены.'))return;
+  PRESETS=JSON.parse(JSON.stringify(DEFAULT_PRESETS));
+  savePresets(PRESETS);
+  renderSettingsTable();
 }
 
-function escHtml(s){
-  return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
-/* ========== PRODUCTS ========== */
+// ===== PRODUCTS DB =====
 function loadSaved(){try{return JSON.parse(localStorage.getItem('calc_products')||'[]')}catch(e){return[]}}
 function saveSaved(arr){localStorage.setItem('calc_products',JSON.stringify(arr))}
 
@@ -479,7 +523,7 @@ function importProducts(event){
   reader.readAsText(file);event.target.value='';
 }
 
-/* ========== CALC ========== */
+// ===== CALC =====
 function fmt(n,d=2){return isFinite(n)?n.toLocaleString('ru-RU',{minimumFractionDigits:d,maximumFractionDigits:d}):'—'}
 function fmtR(n){return isFinite(n)?Math.round(n).toLocaleString('ru-RU'):'—'}
 function set(id,text,cls){const el=document.getElementById(id);el.textContent=text;if(cls!==undefined)el.className=cls}
@@ -547,7 +591,10 @@ function calc(){
   set('max_purch_5',sale>0?fmt(mp5)+' ₽/кг':'—');
 }
 
-renderPresetBtns();
+// Escape on modal
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSettings();});
+
+renderPresets();
 renderSaved();
 </script>
 </body>
