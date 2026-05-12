@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Калькулятор закупки</title>
+<title>Калькулятор закупки v3.0</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 :root {
@@ -87,6 +87,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .io-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
 .io-note{font-size:11px;color:var(--text3);margin-top:6px;line-height:1.5}
 #result-section{display:none}
+.mode-toggle{display:flex;gap:0;margin-bottom:14px;border:1px solid var(--border2);border-radius:7px;overflow:hidden}
+.mode-btn{flex:1;background:var(--surface2);border:none;font-family:var(--sans);font-size:11px;font-weight:600;color:var(--text2);padding:7px 6px;cursor:pointer;transition:all .15s;letter-spacing:.02em}
+.mode-btn.active{background:var(--accent);color:#fff}
+.mode-btn:first-child{border-right:1px solid var(--border2)}
+.info-tag{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:4px;margin-left:6px;vertical-align:middle}
+.tag-tx{background:#fff3cd;color:#856404}.tag-wt{background:#d1ecf1;color:#0c5460}.tag-ps{background:#d4edda;color:#155724}.tag-fin{background:#e2d9f3;color:#4a2c7a}
+.tdabc-section{border-top:1px solid var(--border);margin-top:14px;padding-top:12px;display:none}
+.tdabc-section.visible{display:block}
+.field-group-label{font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text3);margin:10px 0 6px;display:flex;align-items:center;gap:6px}
+.field-group-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.split-bar{display:flex;height:6px;border-radius:4px;overflow:hidden;margin:8px 0 4px;gap:1px}
+.split-bar div{transition:flex .3s}
+.split-legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:10px;color:var(--text2)}
+.split-legend span{display:flex;align-items:center;gap:4px}
+.split-legend b{display:inline-block;width:8px;height:8px;border-radius:2px;flex-shrink:0}
 #file-input{display:none}
 @media(max-width:600px){.layout{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}.field input{width:90px}.header{flex-direction:column;align-items:flex-start;gap:10px}}
 
@@ -143,7 +158,7 @@ tr.drag-over{border-top:2px solid var(--accent)}
 <div class="header">
   <div>
     <h1>Калькулятор закупки</h1>
-    <p>птица и мясо · автономный режим</p>
+    <p>птица и мясо · v3.0 · TD-ABC методика</p>
   </div>
   <div class="header-actions">
     <button class="btn-sm" onclick="openSettings()">⚙ Категории</button>
@@ -168,11 +183,33 @@ tr.drag-over{border-top:2px solid var(--accent)}
 
 <div class="card">
   <div class="card-title">Параметры сделки</div>
+
+  <!-- Переключатель режима -->
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="mode-simple" onclick="setMode('simple')">Простой (руб/кг)</button>
+    <button class="mode-btn" id="mode-tdabc" onclick="setMode('tdabc')">TD-ABC (точный)</button>
+  </div>
+
   <div class="field"><label>Цена закупки</label><div class="iw"><input type="number" id="purchase" placeholder="0.00" step="0.01" oninput="calc()"><span class="unit">руб/кг</span></div></div>
   <div class="field"><label>Цена продажи</label><div class="iw"><input type="number" id="sale" placeholder="0.00" step="0.01" oninput="calc()"><span class="unit">руб/кг</span></div></div>
   <div class="field"><label>Количество</label><div class="iw"><input type="number" id="kg" placeholder="0" step="1" oninput="calc()"><span class="unit">кг</span></div></div>
-  <div class="field"><label>Дебиторка</label><div class="iw"><input type="number" id="deb_days" value="30" step="1" oninput="calc()"><span class="unit">дней</span></div></div>
+
+  <!-- Дебиторка — всегда видима, но расчёт меняется -->
+  <div class="field"><label>Дебиторка</label><div class="iw"><input type="number" id="deb_days" value="30" step="1" oninput="syncCreditDays();calc()"><span class="unit">дней</span></div></div>
   <div class="field"><label>Ставка дебиторки</label><div class="iw"><input type="number" id="deb_pct" value="2" step="0.1" oninput="calc()"><span class="unit">%/мес</span></div></div>
+
+  <!-- TD-ABC поля — видны только в точном режиме -->
+  <div class="tdabc-section" id="tdabc-fields">
+    <div class="field-group-label">Хранение на складе <span class="info-tag tag-ps">позиционные</span></div>
+    <div class="field"><label>Дней на складе до отгрузки</label><div class="iw"><input type="number" id="storage_days" value="3" step="1" min="0" oninput="syncCreditDays();calc()"><span class="unit">дней</span></div></div>
+
+    <div class="field-group-label">Кредитная нагрузка <span class="info-tag tag-fin">финансовые</span></div>
+    <div class="field"><label>Ставка кредита годовая</label><div class="iw"><input type="number" id="credit_annual" value="21" step="0.1" min="0" oninput="calc()"><span class="unit">%/год</span></div></div>
+    <div class="field"><label>Дней кредита (склад+деб.)</label><div class="iw"><input type="number" id="credit_days" value="33" step="1" min="0" readonly><span class="unit">дней</span></div></div>
+
+    <div class="field-group-label">Транзакционные расходы <span class="info-tag tag-tx">на сделку</span></div>
+    <div class="field"><label>Стоимость оформления сделки</label><div class="iw"><input type="number" id="tx_cost" value="2000" step="100" min="0" oninput="calc()"><span class="unit">руб</span></div></div>
+  </div>
 </div>
 
 <div class="card">
@@ -181,9 +218,26 @@ tr.drag-over{border-top:2px solid var(--accent)}
   <div class="hint-box" id="preset-hint"></div>
   <div class="field"><label>Склад / входящая логистика</label><div class="iw"><input type="number" id="extra_rate" value="0" step="0.001" oninput="calc()"><span class="unit">руб/кг</span></div></div>
   <div class="field"><label>Доставка клиенту</label><div class="iw"><input type="number" id="delivery_rate" value="0" step="0.001" oninput="calc()"><span class="unit">руб/кг</span></div></div>
-  <div class="sub-title">Офис и финансы</div>
-  <div class="field"><label>ФОТ + аренда + ИТ + прочее</label><div class="iw"><input type="number" id="opex_rate" value="7.96" step="0.01" oninput="calc()"><span class="unit">руб/кг</span></div></div>
-  <div class="field"><label>Кредит + банковские услуги</label><div class="iw"><input type="number" id="credit_rate" value="1.06" step="0.01" oninput="calc()"><span class="unit">руб/кг</span></div></div>
+
+  <!-- Простой режим: единая ставка OPEX -->
+  <div id="opex-simple-block">
+    <div class="sub-title">Офис и финансы</div>
+    <div class="field"><label>ФОТ + аренда + ИТ + прочее</label><div class="iw"><input type="number" id="opex_rate" value="7.96" step="0.01" oninput="calc()"><span class="unit">руб/кг</span></div></div>
+    <div class="field"><label>Кредит + банковские услуги</label><div class="iw"><input type="number" id="credit_rate" value="1.06" step="0.01" oninput="calc()"><span class="unit">руб/кг</span></div></div>
+  </div>
+
+  <!-- TD-ABC режим: декомпозиция OPEX по группам -->
+  <div id="opex-tdabc-block" style="display:none">
+    <div class="field-group-label">Транзакционные <span class="info-tag tag-tx">на сделку</span></div>
+    <div class="field"><label>Менеджеры + бухгалтерия + ИТ</label><div class="iw"><input type="number" id="opex_tx_month" value="0" step="100" min="0" oninput="calc()"><span class="unit">руб/мес</span></div></div>
+    <div class="field"><label>Сделок в месяц (всего)</label><div class="iw"><input type="number" id="tx_count_month" value="150" step="1" min="1" oninput="calc()"><span class="unit">шт</span></div></div>
+
+    <div class="field-group-label">Весовые <span class="info-tag tag-wt">руб/кг</span></div>
+    <div class="field"><label>Погрузка / разгрузка / контроль</label><div class="iw"><input type="number" id="opex_wt" value="0.50" step="0.01" min="0" oninput="calc()"><span class="unit">руб/кг</span></div></div>
+
+    <div class="field-group-label">Позиционные <span class="info-tag tag-ps">руб/кг·день</span></div>
+    <div class="field"><label>Аренда склада + ФОТ кладовщиков</label><div class="iw"><input type="number" id="opex_ps" value="0.18" step="0.01" min="0" oninput="calc()"><span class="unit">руб/кг·д</span></div></div>
+  </div>
 </div>
 
 <div class="card">
@@ -208,14 +262,28 @@ tr.drag-over{border-top:2px solid var(--accent)}
     <tr><td style="font-weight:600;color:var(--text)">Цена продажи</td><td id="r_sale" style="font-weight:600"></td></tr>
     <tr><td class="ind">− Закупка</td><td id="r_purchase" class="neg"></td></tr>
     <tr class="sub"><td>= Валовая маржа</td><td id="r_gross"></td></tr>
-    <tr><td class="ind">− Склад</td><td id="r_extra" class="neg"></td></tr>
+    <tr><td class="ind">− Склад (вход. логистика)</td><td id="r_extra" class="neg"></td></tr>
     <tr><td class="ind">− Доставка клиенту</td><td id="r_delivery" class="neg"></td></tr>
     <tr class="sub"><td>= После логистики</td><td id="r_after_log"></td></tr>
-    <tr><td class="ind">− ФОТ + аренда + ИТ</td><td id="r_opex" class="neg"></td></tr>
-    <tr><td class="ind">− Кредит + банк</td><td id="r_credit" class="neg"></td></tr>
+    <!-- Простой режим -->
+    <tr id="row_opex_simple"><td class="ind">− ФОТ + аренда + ИТ</td><td id="r_opex" class="neg"></td></tr>
+    <tr id="row_credit_simple"><td class="ind">− Кредит + банк</td><td id="r_credit" class="neg"></td></tr>
+    <!-- TD-ABC режим -->
+    <tr id="row_tx" style="display:none"><td class="ind">− Транзакционные <span class="info-tag tag-tx">TX</span></td><td id="r_tx" class="neg"></td></tr>
+    <tr id="row_wt" style="display:none"><td class="ind">− Весовые <span class="info-tag tag-wt">WT</span></td><td id="r_wt" class="neg"></td></tr>
+    <tr id="row_ps" style="display:none"><td class="ind">− Позиционные <span class="info-tag tag-ps">PS</span></td><td id="r_ps" class="neg"></td></tr>
+    <tr id="row_credit_tdabc" style="display:none"><td class="ind">− Кредит точный <span class="info-tag tag-fin">деньги×дни</span></td><td id="r_credit_tdabc" class="neg"></td></tr>
+    <!-- Всегда -->
     <tr><td class="ind">− Дебиторка</td><td id="r_deb" class="neg"></td></tr>
     <tr class="sub"><td style="font-weight:700">= Операц. прибыль</td><td id="r_profit_kg" style="font-weight:700"></td></tr>
   </table>
+
+  <!-- Диаграмма структуры затрат (только TD-ABC) -->
+  <div id="cost-structure" style="display:none;margin-top:14px">
+    <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:6px">Структура затрат на 1 кг</div>
+    <div class="split-bar" id="split-bar"></div>
+    <div class="split-legend" id="split-legend"></div>
+  </div>
 </div>
 
 <div class="card">
@@ -471,6 +539,16 @@ function renderSaved(){
       document.getElementById('credit_rate').value=item.credit;
       if(item.deb_days)document.getElementById('deb_days').value=item.deb_days;
       if(item.deb_pct)document.getElementById('deb_pct').value=item.deb_pct;
+      // TD-ABC поля
+      if(item.storage_days)document.getElementById('storage_days').value=item.storage_days;
+      if(item.credit_annual)document.getElementById('credit_annual').value=item.credit_annual;
+      if(item.credit_days)document.getElementById('credit_days').value=item.credit_days;
+      if(item.tx_cost)document.getElementById('tx_cost').value=item.tx_cost;
+      if(item.opex_tx_month)document.getElementById('opex_tx_month').value=item.opex_tx_month;
+      if(item.tx_count_month)document.getElementById('tx_count_month').value=item.tx_count_month;
+      if(item.opex_wt)document.getElementById('opex_wt').value=item.opex_wt;
+      if(item.opex_ps)document.getElementById('opex_ps').value=item.opex_ps;
+      if(item.mode)setMode(item.mode);
       calc();
     };
     list.appendChild(div);
@@ -486,7 +564,18 @@ function saveProduct(){
     opex:document.getElementById('opex_rate').value,
     credit:document.getElementById('credit_rate').value,
     deb_days:document.getElementById('deb_days').value,
-    deb_pct:document.getElementById('deb_pct').value};
+    deb_pct:document.getElementById('deb_pct').value,
+    // TD-ABC поля
+    storage_days:document.getElementById('storage_days').value,
+    credit_annual:document.getElementById('credit_annual').value,
+    credit_days:document.getElementById('credit_days').value,
+    tx_cost:document.getElementById('tx_cost').value,
+    opex_tx_month:document.getElementById('opex_tx_month').value,
+    tx_count_month:document.getElementById('tx_count_month').value,
+    opex_wt:document.getElementById('opex_wt').value,
+    opex_ps:document.getElementById('opex_ps').value,
+    mode:currentMode
+  };
   const arr=loadSaved();
   const i=arr.findIndex(a=>a.name===name);
   if(i>=0){if(!confirm('Товар "'+name+'" уже есть. Обновить?'))return;arr[i]=item}else arr.push(item);
@@ -523,10 +612,64 @@ function importProducts(event){
   reader.readAsText(file);event.target.value='';
 }
 
+// ===== MODE =====
+let currentMode = 'simple';
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('mode-simple').classList.toggle('active', mode === 'simple');
+  document.getElementById('mode-tdabc').classList.toggle('active', mode === 'tdabc');
+
+  // Показываем/скрываем поля
+  document.getElementById('tdabc-fields').classList.toggle('visible', mode === 'tdabc');
+  document.getElementById('opex-simple-block').style.display = mode === 'simple' ? '' : 'none';
+  document.getElementById('opex-tdabc-block').style.display = mode === 'tdabc' ? '' : 'none';
+
+  // Строки таблицы
+  document.getElementById('row_opex_simple').style.display = mode === 'simple' ? '' : 'none';
+  document.getElementById('row_credit_simple').style.display = mode === 'simple' ? '' : 'none';
+  document.getElementById('row_tx').style.display = mode === 'tdabc' ? '' : 'none';
+  document.getElementById('row_wt').style.display = mode === 'tdabc' ? '' : 'none';
+  document.getElementById('row_ps').style.display = mode === 'tdabc' ? '' : 'none';
+  document.getElementById('row_credit_tdabc').style.display = mode === 'tdabc' ? '' : 'none';
+  document.getElementById('cost-structure').style.display = mode === 'tdabc' ? '' : 'none';
+
+  calc();
+}
+
+// ===== COST STRUCTURE BAR =====
+function renderCostBar(items) {
+  // items: [{label, value, color}]
+  const total = items.reduce((s, i) => s + Math.max(0, i.value), 0);
+  if (total <= 0) return;
+  const bar = document.getElementById('split-bar');
+  const legend = document.getElementById('split-legend');
+  bar.innerHTML = '';
+  legend.innerHTML = '';
+  items.forEach(item => {
+    if (item.value <= 0) return;
+    const pct = item.value / total;
+    const d = document.createElement('div');
+    d.style.flex = pct;
+    d.style.background = item.color;
+    d.title = item.label + ': ' + item.value.toFixed(2) + ' ₽/кг (' + (pct * 100).toFixed(0) + '%)';
+    bar.appendChild(d);
+    const s = document.createElement('span');
+    s.innerHTML = '<b style="background:' + item.color + '"></b>' + item.label + ' ' + (pct * 100).toFixed(0) + '%';
+    legend.appendChild(s);
+  });
+}
+
 // ===== CALC =====
 function fmt(n,d=2){return isFinite(n)?n.toLocaleString('ru-RU',{minimumFractionDigits:d,maximumFractionDigits:d}):'—'}
 function fmtR(n){return isFinite(n)?Math.round(n).toLocaleString('ru-RU'):'—'}
 function set(id,text,cls){const el=document.getElementById(id);el.textContent=text;if(cls!==undefined)el.className=cls}
+
+function syncCreditDays(){
+  const storageDays=parseFloat(document.getElementById('storage_days').value)||0;
+  const debDays=parseFloat(document.getElementById('deb_days').value)||0;
+  document.getElementById('credit_days').value=storageDays+debDays;
+}
 
 function calc(){
   const purchase=parseFloat(document.getElementById('purchase').value)||0;
@@ -536,59 +679,142 @@ function calc(){
   const debPct=parseFloat(document.getElementById('deb_pct').value)||2;
   const extra=parseFloat(document.getElementById('extra_rate').value)||0;
   const delivery=parseFloat(document.getElementById('delivery_rate').value)||0;
-  const opex=parseFloat(document.getElementById('opex_rate').value)||0;
-  const credit=parseFloat(document.getElementById('credit_rate').value)||0;
   if(!purchase&&!sale)return;
   document.getElementById('result-section').style.display='block';
-  const deb_rate=debPct*(debDays/30)/100;
-  const deb_kg=sale*deb_rate;
-  const gross=sale-purchase;
-  const after_log=gross-extra-delivery;
-  const profit_kg=sale-purchase-extra-delivery-opex-credit-deb_kg;
-  const margin=sale>0?profit_kg/sale*100:0;
-  const cl=v=>v>=0?'pos':'neg';
-  set('r_sale',fmt(sale)+' ₽');
-  set('r_purchase','−'+fmt(purchase)+' ₽','neg');
-  set('r_gross',(gross>=0?'+':'')+fmt(gross)+' ₽  ('+fmt(gross/sale*100,1)+'%)',cl(gross));
-  set('r_extra','−'+fmt(extra,3)+' ₽','neg');
-  set('r_delivery','−'+fmt(delivery,3)+' ₽','neg');
-  set('r_after_log',(after_log>=0?'+':'')+fmt(after_log)+' ₽  ('+fmt(after_log/sale*100,1)+'%)',cl(after_log));
-  set('r_opex','−'+fmt(opex)+' ₽','neg');
-  set('r_credit','−'+fmt(credit)+' ₽','neg');
-  set('r_deb','−'+fmt(deb_kg)+' ₽  ('+fmt(deb_rate*100,2)+'%)','neg');
-  set('r_profit_kg',(profit_kg>=0?'+':'')+fmt(profit_kg)+' ₽',cl(profit_kg));
-  set('t_rev',fmtR(sale*kg)+' ₽');
-  set('t_purch',fmtR(purchase*kg)+' ₽','neg mv');
-  set('t_log',fmtR((extra+delivery)*kg)+' ₽','neg mv');
-  set('t_office',fmtR((opex+credit)*kg)+' ₽','neg mv');
-  set('t_deb',fmtR(deb_kg*kg)+' ₽','neg mv');
-  const pt=profit_kg*kg;
-  document.getElementById('t_profit').textContent=fmtR(pt)+' ₽';
-  document.getElementById('t_profit').className=profit_kg>=0?'pos mv':'neg mv';
-  const verd=document.getElementById('verdict');
-  const vtxt=document.getElementById('v_text');
-  const vdet=document.getElementById('v_detail');
-  if(profit_kg>=0&&margin>=5){
-    verd.className='verdict good';vtxt.textContent='✓ Покупать выгодно';
-    vdet.textContent='Прибыль '+fmt(profit_kg)+' ₽/кг · маржа '+fmt(margin,1)+'%'+(kg>0?' · итого +'+fmtR(pt)+' ₽':'');
-  }else if(profit_kg>=0){
-    verd.className='verdict warn';vtxt.textContent='⚠ Маржа ниже 5% — осторожно';
-    vdet.textContent='Маржа '+fmt(margin,1)+'% — прибыль есть, но риски высокие';
-  }else{
-    verd.className='verdict bad';vtxt.textContent='✗ Убыточная сделка';
-    vdet.textContent='Убыток '+fmt(Math.abs(profit_kg))+' ₽/кг'+(kg>0?' · итого −'+fmtR(Math.abs(pt))+' ₽':'');
+
+  const deb_rate = debPct * (debDays / 30) / 100;
+  const deb_kg = sale * deb_rate;
+  const gross = sale - purchase;
+  const after_log = gross - extra - delivery;
+
+  let opex_kg = 0, credit_kg = 0, profit_kg = 0;
+
+  if (currentMode === 'simple') {
+    // ── ПРОСТОЙ РЕЖИМ: исторические ставки руб/кг ──
+    const opex = parseFloat(document.getElementById('opex_rate').value) || 0;
+    const credit = parseFloat(document.getElementById('credit_rate').value) || 0;
+    opex_kg = opex;
+    credit_kg = credit;
+    profit_kg = sale - purchase - extra - delivery - opex - credit - deb_kg;
+
+    const margin = sale > 0 ? profit_kg / sale * 100 : 0;
+    const cl = v => v >= 0 ? 'pos' : 'neg';
+
+    set('r_sale', fmt(sale) + ' ₽');
+    set('r_purchase', '−' + fmt(purchase) + ' ₽', 'neg');
+    set('r_gross', (gross>=0?'+':'') + fmt(gross) + ' ₽  (' + fmt(gross/sale*100,1) + '%)', cl(gross));
+    set('r_extra', '−' + fmt(extra,3) + ' ₽', 'neg');
+    set('r_delivery', '−' + fmt(delivery,3) + ' ₽', 'neg');
+    set('r_after_log', (after_log>=0?'+':'') + fmt(after_log) + ' ₽  (' + fmt(after_log/sale*100,1) + '%)', cl(after_log));
+    set('r_opex', '−' + fmt(opex) + ' ₽', 'neg');
+    set('r_credit', '−' + fmt(credit) + ' ₽', 'neg');
+    set('r_deb', '−' + fmt(deb_kg) + ' ₽  (' + fmt(deb_rate*100,2) + '%)', 'neg');
+    set('r_profit_kg', (profit_kg>=0?'+':'') + fmt(profit_kg) + ' ₽', cl(profit_kg));
+
+    renderTotals(sale, kg, purchase, extra, delivery, opex_kg + credit_kg, deb_kg, profit_kg);
+    renderBreakeven(purchase, extra + delivery + opex + credit, deb_rate, sale);
+
+  } else {
+    // ── TD-ABC РЕЖИМ: точное распределение по драйверам ──
+    syncCreditDays();
+    const storageDays = parseFloat(document.getElementById('storage_days').value) || 0;
+    const creditAnnual = parseFloat(document.getElementById('credit_annual').value) || 21;
+    const creditDays = parseFloat(document.getElementById('credit_days').value) || (storageDays + debDays);
+    const txCost = parseFloat(document.getElementById('tx_cost').value) || 0;
+
+    const opexTxMonth = parseFloat(document.getElementById('opex_tx_month').value) || 0;
+    const txCountMonth = parseFloat(document.getElementById('tx_count_month').value) || 150;
+    const opexWt = parseFloat(document.getElementById('opex_wt').value) || 0;
+    const opexPs = parseFloat(document.getElementById('opex_ps').value) || 0;
+
+    // [TX] Транзакционные = (стоимость_сделки + доля_ФОТ_офиса) / кг
+    const txTotal = txCost + (opexTxMonth / txCountMonth);
+    const tx_kg = kg > 0 ? txTotal / kg : 0;
+
+    // [WT] Весовые = руб/кг (прямо)
+    const wt_kg = opexWt;
+
+    // [PS] Позиционные = руб/кг·день × дни хранения
+    const ps_kg = opexPs * storageDays;
+
+    // [FIN] Кредит точный = закупка × ставка_год / 365 × дни
+    const credit_tdabc = purchase * (creditAnnual / 100) / 365 * creditDays;
+
+    opex_kg = tx_kg + wt_kg + ps_kg;
+    credit_kg = credit_tdabc;
+
+    profit_kg = sale - purchase - extra - delivery - tx_kg - wt_kg - ps_kg - credit_tdabc - deb_kg;
+
+    const margin = sale > 0 ? profit_kg / sale * 100 : 0;
+    const cl = v => v >= 0 ? 'pos' : 'neg';
+
+    set('r_sale', fmt(sale) + ' ₽');
+    set('r_purchase', '−' + fmt(purchase) + ' ₽', 'neg');
+    set('r_gross', (gross>=0?'+':'') + fmt(gross) + ' ₽  (' + fmt(gross/sale*100,1) + '%)', cl(gross));
+    set('r_extra', '−' + fmt(extra,3) + ' ₽', 'neg');
+    set('r_delivery', '−' + fmt(delivery,3) + ' ₽', 'neg');
+    set('r_after_log', (after_log>=0?'+':'') + fmt(after_log) + ' ₽  (' + fmt(after_log/sale*100,1) + '%)', cl(after_log));
+    set('r_tx', '−' + fmt(tx_kg) + ' ₽' + (kg > 0 ? '  (' + fmtR(txTotal) + ' р/сделку)' : ''), 'neg');
+    set('r_wt', '−' + fmt(wt_kg) + ' ₽', 'neg');
+    set('r_ps', '−' + fmt(ps_kg) + ' ₽  (' + storageDays + ' дн × ' + fmt(opexPs,2) + ')', 'neg');
+    set('r_credit_tdabc', '−' + fmt(credit_tdabc) + ' ₽  (' + creditDays + ' дн × ' + fmt(creditAnnual,1) + '% год)', 'neg');
+    set('r_deb', '−' + fmt(deb_kg) + ' ₽  (' + fmt(deb_rate*100,2) + '%)', 'neg');
+    set('r_profit_kg', (profit_kg>=0?'+':'') + fmt(profit_kg) + ' ₽', cl(profit_kg));
+
+    // Диаграмма структуры затрат
+    renderCostBar([
+      {label:'Закупка', value: purchase, color:'#94a3b8'},
+      {label:'Логистика', value: extra + delivery, color:'#60a5fa'},
+      {label:'TX', value: tx_kg, color:'#f59e0b'},
+      {label:'Вес', value: wt_kg, color:'#34d399'},
+      {label:'Склад×дни', value: ps_kg, color:'#10b981'},
+      {label:'Кредит', value: credit_tdabc, color:'#a78bfa'},
+      {label:'Дебиторка', value: deb_kg, color:'#f472b6'},
+      {label:'Прибыль', value: Math.max(0, profit_kg), color:'#22c55e'},
+    ]);
+
+    renderTotals(sale, kg, purchase, extra, delivery, opex_kg + credit_kg, deb_kg, profit_kg);
+    renderBreakeven(purchase, extra + delivery + wt_kg + ps_kg + credit_tdabc + tx_kg, deb_rate, sale);
   }
-  const fixed=extra+delivery+opex+credit;
-  const bp=(purchase+fixed)/(1-deb_rate);
-  const t5=(purchase+fixed)/(1-deb_rate-0.05);
-  const t10=(purchase+fixed)/(1-deb_rate-0.10);
-  const mp=sale>0?sale*(1-deb_rate)-fixed:NaN;
-  const mp5=sale>0?sale*(1-deb_rate-0.05)-fixed:NaN;
-  set('break_price',fmt(bp)+' ₽/кг');
-  set('target_5',fmt(t5)+' ₽/кг');
-  set('target_10',fmt(t10)+' ₽/кг');
-  set('max_purchase',sale>0?fmt(mp)+' ₽/кг':'—');
-  set('max_purch_5',sale>0?fmt(mp5)+' ₽/кг':'—');
+}
+
+function renderTotals(sale, kg, purchase, extra, delivery, opex_total, deb_kg, profit_kg) {
+  set('t_rev', fmtR(sale*kg) + ' ₽');
+  set('t_purch', fmtR(purchase*kg) + ' ₽', 'neg mv');
+  set('t_log', fmtR((extra+delivery)*kg) + ' ₽', 'neg mv');
+  set('t_office', fmtR(opex_total*kg) + ' ₽', 'neg mv');
+  set('t_deb', fmtR(deb_kg*kg) + ' ₽', 'neg mv');
+  const pt = profit_kg * kg;
+  document.getElementById('t_profit').textContent = fmtR(pt) + ' ₽';
+  document.getElementById('t_profit').className = profit_kg >= 0 ? 'pos mv' : 'neg mv';
+
+  const margin = sale > 0 ? profit_kg / sale * 100 : 0;
+  const verd = document.getElementById('verdict');
+  const vtxt = document.getElementById('v_text');
+  const vdet = document.getElementById('v_detail');
+  if (profit_kg >= 0 && margin >= 5) {
+    verd.className = 'verdict good'; vtxt.textContent = '✓ Покупать выгодно';
+    vdet.textContent = 'Прибыль ' + fmt(profit_kg) + ' ₽/кг · маржа ' + fmt(margin,1) + '%' + (kg > 0 ? ' · итого +' + fmtR(pt) + ' ₽' : '');
+  } else if (profit_kg >= 0) {
+    verd.className = 'verdict warn'; vtxt.textContent = '⚠ Маржа ниже 5% — осторожно';
+    vdet.textContent = 'Маржа ' + fmt(margin,1) + '% — прибыль есть, но риски высокие';
+  } else {
+    verd.className = 'verdict bad'; vtxt.textContent = '✗ Убыточная сделка';
+    vdet.textContent = 'Убыток ' + fmt(Math.abs(profit_kg)) + ' ₽/кг' + (kg > 0 ? ' · итого −' + fmtR(Math.abs(pt)) + ' ₽' : '');
+  }
+}
+
+function renderBreakeven(purchase, fixed, deb_rate, sale) {
+  const bp = (purchase + fixed) / (1 - deb_rate);
+  const t5 = (purchase + fixed) / (1 - deb_rate - 0.05);
+  const t10 = (purchase + fixed) / (1 - deb_rate - 0.10);
+  const mp = sale > 0 ? sale * (1 - deb_rate) - fixed : NaN;
+  const mp5 = sale > 0 ? sale * (1 - deb_rate - 0.05) - fixed : NaN;
+  set('break_price', fmt(bp) + ' ₽/кг');
+  set('target_5', fmt(t5) + ' ₽/кг');
+  set('target_10', fmt(t10) + ' ₽/кг');
+  set('max_purchase', sale > 0 ? fmt(mp) + ' ₽/кг' : '—');
+  set('max_purch_5', sale > 0 ? fmt(mp5) + ' ₽/кг' : '—');
 }
 
 // Escape on modal
