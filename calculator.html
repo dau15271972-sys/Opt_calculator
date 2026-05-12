@@ -57,7 +57,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .breakdown .sub td:first-child{border-radius:6px 0 0 6px}
 .breakdown .sub td:last-child{border-radius:0 6px 6px 0}
 .neg{color:var(--red)!important}.pos{color:var(--green)!important}
-.metrics{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-bottom:12px}
+.metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:12px}
 .metric{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:10px 11px}
 .metric .ml{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:3px}
 .metric .mv{font-family:var(--mono);font-size:14px;font-weight:500;color:var(--text)}
@@ -196,7 +196,6 @@ tr.drag-over{border-top:2px solid var(--accent)}
 
   <!-- Дебиторка — всегда видима, но расчёт меняется -->
   <div class="field"><label>Дебиторка</label><div class="iw"><input type="number" id="deb_days" value="30" step="1" oninput="syncCreditDays();calc()"><span class="unit">дней</span></div></div>
-  <div class="field"><label>Ставка дебиторки</label><div class="iw"><input type="number" id="deb_pct" value="2" step="0.1" oninput="calc()"><span class="unit">%/мес</span></div></div>
 
   <!-- TD-ABC поля — видны только в точном режиме -->
   <div class="tdabc-section" id="tdabc-fields">
@@ -274,7 +273,6 @@ tr.drag-over{border-top:2px solid var(--accent)}
     <tr id="row_ps" style="display:none"><td class="ind">− Позиционные <span class="info-tag tag-ps">PS</span></td><td id="r_ps" class="neg"></td></tr>
     <tr id="row_credit_tdabc" style="display:none"><td class="ind">− Кредит точный <span class="info-tag tag-fin">деньги×дни</span></td><td id="r_credit_tdabc" class="neg"></td></tr>
     <!-- Всегда -->
-    <tr><td class="ind">− Дебиторка</td><td id="r_deb" class="neg"></td></tr>
     <tr class="sub"><td style="font-weight:700">= Операц. прибыль</td><td id="r_profit_kg" style="font-weight:700"></td></tr>
   </table>
 
@@ -293,7 +291,6 @@ tr.drag-over{border-top:2px solid var(--accent)}
     <div class="metric"><div class="ml">Закупка</div><div class="mv neg" id="t_purch">—</div></div>
     <div class="metric"><div class="ml">Логистика</div><div class="mv neg" id="t_log">—</div></div>
     <div class="metric"><div class="ml">Офис+кредит</div><div class="mv neg" id="t_office">—</div></div>
-    <div class="metric"><div class="ml">Дебиторка</div><div class="mv neg" id="t_deb">—</div></div>
     <div class="metric"><div class="ml">Прибыль</div><div class="mv" id="t_profit">—</div></div>
   </div>
   <div class="verdict bad" id="verdict">
@@ -538,7 +535,6 @@ function renderSaved(){
       document.getElementById('opex_rate').value=item.opex;
       document.getElementById('credit_rate').value=item.credit;
       if(item.deb_days)document.getElementById('deb_days').value=item.deb_days;
-      if(item.deb_pct)document.getElementById('deb_pct').value=item.deb_pct;
       // TD-ABC поля
       if(item.storage_days)document.getElementById('storage_days').value=item.storage_days;
       if(item.credit_annual)document.getElementById('credit_annual').value=item.credit_annual;
@@ -564,7 +560,6 @@ function saveProduct(){
     opex:document.getElementById('opex_rate').value,
     credit:document.getElementById('credit_rate').value,
     deb_days:document.getElementById('deb_days').value,
-    deb_pct:document.getElementById('deb_pct').value,
     // TD-ABC поля
     storage_days:document.getElementById('storage_days').value,
     credit_annual:document.getElementById('credit_annual').value,
@@ -676,14 +671,11 @@ function calc(){
   const sale=parseFloat(document.getElementById('sale').value)||0;
   const kg=parseFloat(document.getElementById('kg').value)||0;
   const debDays=parseFloat(document.getElementById('deb_days').value)||30;
-  const debPct=parseFloat(document.getElementById('deb_pct').value)||2;
   const extra=parseFloat(document.getElementById('extra_rate').value)||0;
   const delivery=parseFloat(document.getElementById('delivery_rate').value)||0;
   if(!purchase&&!sale)return;
   document.getElementById('result-section').style.display='block';
 
-  const deb_rate = debPct * (debDays / 30) / 100;
-  const deb_kg = sale * deb_rate;
   const gross = sale - purchase;
   const after_log = gross - extra - delivery;
 
@@ -695,7 +687,7 @@ function calc(){
     const credit = parseFloat(document.getElementById('credit_rate').value) || 0;
     opex_kg = opex;
     credit_kg = credit;
-    profit_kg = sale - purchase - extra - delivery - opex - credit - deb_kg;
+    profit_kg = sale - purchase - extra - delivery - opex - credit;
 
     const margin = sale > 0 ? profit_kg / sale * 100 : 0;
     const cl = v => v >= 0 ? 'pos' : 'neg';
@@ -708,11 +700,10 @@ function calc(){
     set('r_after_log', (after_log>=0?'+':'') + fmt(after_log) + ' ₽  (' + fmt(after_log/sale*100,1) + '%)', cl(after_log));
     set('r_opex', '−' + fmt(opex) + ' ₽', 'neg');
     set('r_credit', '−' + fmt(credit) + ' ₽', 'neg');
-    set('r_deb', '−' + fmt(deb_kg) + ' ₽  (' + fmt(deb_rate*100,2) + '%)', 'neg');
     set('r_profit_kg', (profit_kg>=0?'+':'') + fmt(profit_kg) + ' ₽', cl(profit_kg));
 
-    renderTotals(sale, kg, purchase, extra, delivery, opex_kg + credit_kg, deb_kg, profit_kg);
-    renderBreakeven(purchase, extra + delivery + opex + credit, deb_rate, sale);
+    renderTotals(sale, kg, purchase, extra, delivery, opex_kg + credit_kg, profit_kg);
+    renderBreakeven(purchase, extra + delivery + opex + credit, sale);
 
   } else {
     // ── TD-ABC РЕЖИМ: точное распределение по драйверам ──
@@ -743,7 +734,7 @@ function calc(){
     opex_kg = tx_kg + wt_kg + ps_kg;
     credit_kg = credit_tdabc;
 
-    profit_kg = sale - purchase - extra - delivery - tx_kg - wt_kg - ps_kg - credit_tdabc - deb_kg;
+    profit_kg = sale - purchase - extra - delivery - tx_kg - wt_kg - ps_kg - credit_tdabc;
 
     const margin = sale > 0 ? profit_kg / sale * 100 : 0;
     const cl = v => v >= 0 ? 'pos' : 'neg';
@@ -758,7 +749,6 @@ function calc(){
     set('r_wt', '−' + fmt(wt_kg) + ' ₽', 'neg');
     set('r_ps', '−' + fmt(ps_kg) + ' ₽  (' + storageDays + ' дн × ' + fmt(opexPs,2) + ')', 'neg');
     set('r_credit_tdabc', '−' + fmt(credit_tdabc) + ' ₽  (' + creditDays + ' дн × ' + fmt(creditAnnual,1) + '% год)', 'neg');
-    set('r_deb', '−' + fmt(deb_kg) + ' ₽  (' + fmt(deb_rate*100,2) + '%)', 'neg');
     set('r_profit_kg', (profit_kg>=0?'+':'') + fmt(profit_kg) + ' ₽', cl(profit_kg));
 
     // Диаграмма структуры затрат
@@ -769,21 +759,19 @@ function calc(){
       {label:'Вес', value: wt_kg, color:'#34d399'},
       {label:'Склад×дни', value: ps_kg, color:'#10b981'},
       {label:'Кредит', value: credit_tdabc, color:'#a78bfa'},
-      {label:'Дебиторка', value: deb_kg, color:'#f472b6'},
       {label:'Прибыль', value: Math.max(0, profit_kg), color:'#22c55e'},
     ]);
 
-    renderTotals(sale, kg, purchase, extra, delivery, opex_kg + credit_kg, deb_kg, profit_kg);
-    renderBreakeven(purchase, extra + delivery + wt_kg + ps_kg + credit_tdabc + tx_kg, deb_rate, sale);
+    renderTotals(sale, kg, purchase, extra, delivery, opex_kg + credit_kg, profit_kg);
+    renderBreakeven(purchase, extra + delivery + wt_kg + ps_kg + credit_tdabc + tx_kg, sale);
   }
 }
 
-function renderTotals(sale, kg, purchase, extra, delivery, opex_total, deb_kg, profit_kg) {
+function renderTotals(sale, kg, purchase, extra, delivery, opex_total, profit_kg) {
   set('t_rev', fmtR(sale*kg) + ' ₽');
   set('t_purch', fmtR(purchase*kg) + ' ₽', 'neg mv');
   set('t_log', fmtR((extra+delivery)*kg) + ' ₽', 'neg mv');
   set('t_office', fmtR(opex_total*kg) + ' ₽', 'neg mv');
-  set('t_deb', fmtR(deb_kg*kg) + ' ₽', 'neg mv');
   const pt = profit_kg * kg;
   document.getElementById('t_profit').textContent = fmtR(pt) + ' ₽';
   document.getElementById('t_profit').className = profit_kg >= 0 ? 'pos mv' : 'neg mv';
@@ -804,12 +792,12 @@ function renderTotals(sale, kg, purchase, extra, delivery, opex_total, deb_kg, p
   }
 }
 
-function renderBreakeven(purchase, fixed, deb_rate, sale) {
-  const bp = (purchase + fixed) / (1 - deb_rate);
-  const t5 = (purchase + fixed) / (1 - deb_rate - 0.05);
-  const t10 = (purchase + fixed) / (1 - deb_rate - 0.10);
-  const mp = sale > 0 ? sale * (1 - deb_rate) - fixed : NaN;
-  const mp5 = sale > 0 ? sale * (1 - deb_rate - 0.05) - fixed : NaN;
+function renderBreakeven(purchase, fixed, sale) {
+  const bp = purchase + fixed;
+  const t5 = (purchase + fixed) / 0.95;
+  const t10 = (purchase + fixed) / 0.90;
+  const mp = sale > 0 ? sale - fixed : NaN;
+  const mp5 = sale > 0 ? sale * 0.95 - fixed : NaN;
   set('break_price', fmt(bp) + ' ₽/кг');
   set('target_5', fmt(t5) + ' ₽/кг');
   set('target_10', fmt(t10) + ' ₽/кг');
